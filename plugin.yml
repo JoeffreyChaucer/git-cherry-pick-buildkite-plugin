@@ -1,0 +1,10 @@
+name: Git Cherry Pick
+description: A Buildkite plugin to commit and push the results of a command to a git repository.
+author: https://github.com/joeffreychaucer
+requirements: [hub]
+configuration:
+  properties:
+    branch:
+      type: string
+    label:
+      type: [string, array]

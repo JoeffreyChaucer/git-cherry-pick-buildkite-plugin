@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+if [[ ${BUILDKITE_COMMAND_EXIT_STATUS:-0} != "0" ]]; then
+  echo "--- Skipping git-commit because the command failed"
+  exit 0
+fi
+
+branch=${BUILDKITE_PLUGIN_GIT_CHERRY_PICK_BRANCH:-${BUILDKITE_BRANCH}}
+
+prLabels=${BUILDKITE_PLUGIN_GIT_CHERRY_PICK_LABEL:-"autocreated"}
+
+sha=$(git rev-parse HEAD)
+
+githubSHA=${BUILDKITE_COMMIT:-$sha}
+
+prBranch="auto-$branch-$githubSHA"
+
+git remote update
+git fetch --all
+git checkout -b "${prBranch}" origin/"${branch}"
+git cherry-pick "${githubSHA}"
+git push -u origin "${prBranch}"
+gh pr create -B "${branch}" -H "${prBranch}" -l "${prLabels}" --fill
